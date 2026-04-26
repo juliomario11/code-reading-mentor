@@ -102,9 +102,13 @@ def imprimir_reporte(resultados: list[dict[str, str]]) -> None:
         print(f"Con etiqueta esperada: {len(con_esperado)}")
         print(f"Aciertos: {aciertos} ({accuracy:.1f}%)")
 
-        print("\nErrores:")
-        for r in con_esperado:
-            if r["sentimiento_predicho"] != r["sentimiento_esperado"]:
+        errores = [
+            r for r in con_esperado
+            if r["sentimiento_predicho"] != r["sentimiento_esperado"]
+        ]
+        if errores:
+            print("\nErrores:")
+            for r in errores:
                 print(
                     f"  - [{r['id']}] esperado={r['sentimiento_esperado']} "
                     f"predicho={r['sentimiento_predicho']} :: {r['texto'][:80]}"
