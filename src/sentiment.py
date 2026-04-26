@@ -26,7 +26,7 @@ from openai import APIConnectionError, APIError, AuthenticationError
 
 from src.client import AgentConfig, build_client
 
-ETIQUETAS = {"positivo", "neutral", "negativo"}
+ETIQUETAS = ("positivo", "neutral", "negativo")
 
 CLASSIFICATION_PROMPT = (
     "Actúa como un clasificador de sentimientos para comentarios de revisión "
