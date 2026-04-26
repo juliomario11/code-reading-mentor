@@ -1,0 +1,41 @@
+id,texto,sentimiento_esperado
+1,"Excelente refactor, el código quedó mucho más legible y los nombres de las variables ahora son claros.",positivo
+2,"Muy buen trabajo separando la lógica de negocio del controlador, esto facilita las pruebas.",positivo
+3,"La documentación está perfecta, cualquiera que lea este módulo lo entenderá al instante.",positivo
+4,"Me encanta cómo usaste generadores en lugar de listas, la memoria va a agradecerlo.",positivo
+5,"Gracias por los tests unitarios, cubren muy bien los casos borde.",positivo
+6,"Este cambio mejora el rendimiento notablemente, buen análisis del bottleneck.",positivo
+7,"La estructura del PR es limpia y los commits están bien descritos.",positivo
+8,"El manejo de errores quedó muy robusto, me gusta que siempre hay un mensaje claro.",positivo
+9,"Aprobado, este patrón lo podemos reutilizar en el resto del servicio.",positivo
+10,"El API quedó muy intuitivo, felicitaciones al equipo.",positivo
+11,"Creo que este código funciona, pero faltarían más pruebas antes de mergear.",neutral
+12,"Revisé el módulo, hace lo que dice, aunque podría ser más conciso.",neutral
+13,"El PR cumple con los requisitos mínimos. Se podría iterar después.",neutral
+14,"No estoy seguro de si este es el mejor enfoque, pero no tengo un contraargumento fuerte.",neutral
+15,"Funciona, aunque el estilo mezcla dos convenciones distintas del proyecto.",neutral
+16,"Lo dejo a criterio del equipo: ambas opciones son viables.",neutral
+17,"El cambio es pequeño, no tengo comentarios mayores.",neutral
+18,"Se puede mergear así, aunque valdría la pena agregar un CHANGELOG.",neutral
+19,"Tiene sentido lo que propones, pero habría que validar con el equipo de backend.",neutral
+20,"El código es legible, sin ser espectacular.",neutral
+21,"Este loop anidado va a explotar en producción con datasets grandes, por favor optimizar.",negativo
+22,"Hay una fuga de memoria evidente porque nunca cierras la conexión a la base de datos.",negativo
+23,"Este nombre de variable no dice nada, 'data' puede significar cualquier cosa.",negativo
+24,"Se rompe toda la compatibilidad con la versión anterior, esto no puede mergearse así.",negativo
+25,"Estás guardando contraseñas en texto plano, esto es un problema de seguridad crítico.",negativo
+26,"El PR es enorme, imposible revisarlo de manera seria, deberías dividirlo.",negativo
+27,"Copiaste y pegaste el mismo bloque cuatro veces, esto pide un refactor urgente.",negativo
+28,"No hay manejo de errores en ninguna llamada al API externa, cualquier fallo tumba el proceso.",negativo
+29,"El test está siempre pasando porque no tiene assertions, no sirve de nada.",negativo
+30,"Este commit rompe el build de CI, por favor revisa antes de pedir review.",negativo
+31,"Se usa eval() con input del usuario, esto es un riesgo de inyección de código.",negativo
+32,"El archivo tiene mil líneas y cero comentarios, es imposible de mantener.",negativo
+33,"Muy buena idea usar dataclasses aquí, ayuda mucho a la claridad.",positivo
+34,"Le faltan logs al proceso, no hay forma de depurar si algo falla en producción.",negativo
+35,"Me parece correcto, aunque yo hubiera usado un diccionario en vez de varias listas paralelas.",neutral
+36,"Gracias por actualizar la documentación, estaba desfasada hace meses.",positivo
+37,"El commit message no describe el cambio real que hiciste.",negativo
+38,"La lógica está bien pero los nombres de las funciones no siguen la convención del repo.",neutral
+39,"Brillante la manera en que encapsulaste la llamada externa, queda muy testeable.",positivo
+40,"Este código asume que la lista nunca está vacía y va a fallar en runtime tarde o temprano.",negativo
