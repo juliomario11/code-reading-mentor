@@ -1,0 +1,42 @@
+# === Secretos y entorno ===
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# === Virtual env ===
+venv/
+.venv/
+env/
+ENV/
+
+# === IDEs ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === OS ===
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# === Logs ===
+*.log
+logs/
+
+# === Notas privadas (las del curso) ===
+Notas_internas.md
+notes.md
