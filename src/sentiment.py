@@ -33,7 +33,7 @@ CLASSIFICATION_PROMPT = (
     "de código escritos en español. Responde ÚNICAMENTE con una sola palabra "
     "en minúsculas, sin puntuación ni explicación: 'positivo', 'neutral' o "
     "'negativo'.\n\n"
-    "Comentario:\n{texto}"
+    "Comentario:\n"
 )
 
 DEFAULT_CSV = Path(__file__).resolve().parent.parent / "data" / "comentarios_codigo.csv"
@@ -62,7 +62,7 @@ def clasificar(
         if not texto:
             continue
 
-        prompt = CLASSIFICATION_PROMPT.format(texto=texto)
+        prompt = CLASSIFICATION_PROMPT + texto
         respuesta = client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
