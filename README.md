@@ -56,8 +56,8 @@ can target OpenAI, Anthropic, Groq, vLLM, etc., with a one-line config change.
 
 ### Setup
 
-\`\`\`bash
-git clone https://github.com/<your-username>/code-reading-mentor.git
+```bash
+git clone https://github.com/juliomario11/code-reading-mentor.git
 cd code-reading-mentor
 
 python -m venv .venv
@@ -70,17 +70,17 @@ pip install -r requirements.txt
 
 cp .env.example .env
 # Edit .env with your agent endpoint and access key (see below)
-\`\`\`
+```
 
 ### Configuration
 
 Edit `.env`:
 
-\`\`\`env
+```env
 DO_AGENT_ENDPOINT=https://YOUR_AGENT_SUBDOMAIN.agents.do-ai.run
 DO_AGENT_ACCESS_KEY=your_endpoint_access_key
 DO_AGENT_MODEL=n/a   # The agent has its own model configured server-side
-\`\`\`
+```
 
 Get these from your DO Gradient AI agent's panel:
 1. Go to your agent in [the DO control panel](https://cloud.digitalocean.com/gen-ai/agents).
@@ -91,15 +91,15 @@ Get these from your DO Gradient AI agent's panel:
 
 One-shot demo:
 
-\`\`\`bash
+```bash
 python -m src.client
-\`\`\`
+```
 
 Interactive REPL with streaming and history:
 
-\`\`\`bash
+```bash
 python -m src.chat
-\`\`\`
+```
 
 In the REPL:
 
