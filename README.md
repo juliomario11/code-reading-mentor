@@ -1,7 +1,7 @@
 # 🧠 code-reading-mentor
 
-> An AI agent specialized in helping developers read and understand code written by others.
-> Built on top of [DigitalOcean Gradient AI Platform](https://www.digitalocean.com/products/gradient) using Meta Llama 3.3 70B Instruct.
+> Un agente de IA especializado en ayudar a desarrolladores a **leer y entender código escrito por otras personas**.
+> Construido sobre la [DigitalOcean Gradient AI Platform](https://www.digitalocean.com/products/gradient) usando Meta Llama 3.3 70B Instruct.
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![DigitalOcean Gradient AI](https://img.shields.io/badge/DO-Gradient%20AI-0080FF.svg)](https://docs.digitalocean.com/products/gradient-ai-platform/)
@@ -9,52 +9,54 @@
 
 ---
 
-## What this is
+## Qué es esto
 
-A focused AI agent that helps you read code you didn't write. You paste a snippet,
-and it walks you through it like a senior engineer would: language and intent first,
-then structure, then logic, then the non-obvious parts (idioms, side effects, likely bugs).
+Un agente de IA enfocado que te ayuda a leer código que no escribiste tú. Pegas un fragmento
+y te lo explica como lo haría un ingeniero senior: primero el lenguaje y la intención,
+luego la estructura, después la lógica, y al final lo no obvio (modismos, efectos secundarios, posibles bugs).
 
-Crucially, when given a snippet without enough context, **it asks follow-up questions
-instead of fabricating an explanation** — a defensive behavior built into the system prompt.
+Lo más importante: cuando le entregas un fragmento sin contexto suficiente, **hace preguntas
+de seguimiento en vez de inventar una explicación** — un comportamiento defensivo que está
+incorporado directamente en el system prompt.
 
-## Why I built it
+## Por qué lo construí
 
-I wanted to learn the full lifecycle of building, deploying and consuming a managed AI
-agent end-to-end, without lock-in to any single LLM provider:
+Quería aprender el ciclo de vida completo de construir, desplegar y consumir un agente
+de IA gestionado de punta a punta, sin quedar atado a un solo proveedor de LLM:
 
-- **Provision** an agent on a managed platform (DO Gradient AI).
-- **Iterate** the system prompt with versioning and concrete test cases.
-- **Consume** it from local Python using a portable, OpenAI-compatible API.
-- **Document** it cleanly enough that anyone can reproduce in 5 minutes.
+- **Provisionar** un agente en una plataforma gestionada (DO Gradient AI).
+- **Iterar** el system prompt con versionado y casos de prueba concretos.
+- **Consumirlo** desde Python local usando un API portable compatible con OpenAI.
+- **Documentarlo** lo suficientemente limpio para que cualquiera lo reproduzca en 5 minutos.
 
-## Architecture
+## Arquitectura
 
 ```
                   +-------------------------------+
                   |   DigitalOcean Gradient AI    |
    +--------+     |   ┌─────────────────────┐     |
-   |   you  | →   |   │ Agent: code-mentor  │     |
+   |   tú   | →   |   │ Agente: code-mentor │     |
    | (REPL) |     |   │  - System prompt    │     |
    +--------+     |   │  - Llama 3.3 70B    │     |
         ↑         |   └─────────────────────┘     |
         |         +-------------------------------+
-        +---- streaming response (token-by-token)
+        +---- respuesta en streaming (token a token)
 ```
 
-The agent's endpoint is OpenAI-compatible, so the client uses the official
-`openai` Python SDK — only the `base_url` changes. This means the same code
-can target OpenAI, Anthropic, Groq, vLLM, etc., with a one-line config change.
+El endpoint del agente es compatible con OpenAI, así que el cliente usa el SDK oficial
+de `openai` en Python — solo cambia el `base_url`. Esto significa que el mismo código
+puede apuntar a OpenAI, Anthropic, Groq, vLLM, etc., con un cambio de una sola línea
+en la configuración.
 
-## Quickstart
+## Inicio rápido
 
-### Prerequisites
+### Requisitos previos
 
 - Python 3.10+
-- A [DigitalOcean account](https://cloud.digitalocean.com/registrations/new) with Gradient AI access
-- An agent created in DO Gradient AI Platform (see [Setup](#setup))
+- Una [cuenta de DigitalOcean](https://cloud.digitalocean.com/registrations/new) con acceso a Gradient AI
+- Un agente creado en DO Gradient AI Platform (ver [Configuración del agente](#configuración-del-agente-en-do-gradient-ai))
 
-### Setup
+### Instalación
 
 ```bash
 git clone https://github.com/juliomario11/code-reading-mentor.git
@@ -69,110 +71,139 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# Edit .env with your agent endpoint and access key (see below)
+# Edita .env con el endpoint y el access key de tu agente (ver abajo)
 ```
 
-### Configuration
+### Configuración
 
-Edit `.env`:
+Edita `.env`:
 
 ```env
-DO_AGENT_ENDPOINT=https://YOUR_AGENT_SUBDOMAIN.agents.do-ai.run
-DO_AGENT_ACCESS_KEY=your_endpoint_access_key
-DO_AGENT_MODEL=n/a   # The agent has its own model configured server-side
+DO_AGENT_ENDPOINT=https://TU_SUBDOMINIO.agents.do-ai.run
+DO_AGENT_ACCESS_KEY=tu_endpoint_access_key
+DO_AGENT_MODEL=n/a   # El agente ya tiene un modelo configurado del lado del servidor
 ```
 
-Get these from your DO Gradient AI agent's panel:
-1. Go to your agent in [the DO control panel](https://cloud.digitalocean.com/gen-ai/agents).
-2. Copy the **Endpoint URL** (top of the agent page).
-3. Create an **Endpoint Access Key** in the agent settings.
+Estos valores los obtienes desde el panel de tu agente de DO Gradient AI:
+1. Entra a tu agente en [el panel de control de DO](https://cloud.digitalocean.com/gen-ai/agents).
+2. Copia el **Endpoint URL** (arriba en la página del agente).
+3. Crea un **Endpoint Access Key** en la sección de ajustes del agente.
 
-### Run
+### Ejecución
 
-One-shot demo:
+Demo de una sola interacción:
 
 ```bash
 python -m src.client
 ```
 
-Interactive REPL with streaming and history:
+REPL interactivo con streaming e historial:
 
 ```bash
 python -m src.chat
 ```
 
-In the REPL:
+Dentro del REPL:
 
-| Command  | What it does                       |
-| -------- | ---------------------------------- |
-| `/reset` | Clears the conversation history    |
-| `/tokens`| Shows accumulated message count    |
-| `/exit`  | Quits the REPL (or `Ctrl+C`)       |
+| Comando   | Qué hace                               |
+| --------- | -------------------------------------- |
+| `/reset`  | Limpia el historial de la conversación |
+| `/tokens` | Muestra los mensajes acumulados        |
+| `/exit`   | Sale del REPL (también `Ctrl+C`)       |
 
-## Setting up the agent on DO Gradient AI
+### Analizador de sentimientos sobre comentarios de código
 
-If you want to recreate the agent yourself (recommended for learning):
+El repo incluye un dataset de ejemplo y un script que usa al mismo agente como clasificador
+de sentimientos sobre comentarios de revisión de código en español.
 
-1. Create a project on DO and a Personal Access Token with `genai` (full CRUD)
-   and `project` (read) scopes.
-2. Create an agent in **Agent Platform**:
-   - **Name:** `code-reading-mentor`
-   - **Model:** `Meta Llama 3.3 Instruct (70B)` (open-source models are available
-     even on the trial tier; commercial models like Claude or GPT may require a
-     paid subscription tier)
-   - **Region:** `tor1`
-   - **Instructions:** see [`prompts/system_prompt_v2.md`](prompts/system_prompt_v2.md)
-3. Generate an Endpoint Access Key from the agent's settings.
+- Dataset: [`data/comentarios_codigo.csv`](data/comentarios_codigo.csv) con columnas
+  `id, texto, sentimiento_esperado` (etiquetas: `positivo`, `neutral`, `negativo`).
+- Script: [`src/sentiment.py`](src/sentiment.py).
 
-## Notes on the system prompt
+Para correrlo:
 
-The instructions evolved across iterations:
+```bash
+# Clasifica el dataset por defecto e imprime un reporte de accuracy
+python -m src.sentiment
 
-- **v1** — basic 5-step protocol. Failed when given snippets without context: it would
-  fabricate plausible-but-incorrect explanations of methods it had never seen.
-- **v2 (current)** — adds a mandatory **Step 0: Context Check** before any analysis.
-  If the snippet has undefined identifiers and no surrounding context, the agent halts
-  the protocol and asks 1–3 targeted questions instead of guessing.
+# Usa tu propio CSV (sólo necesita la columna `texto`)
+python -m src.sentiment ruta/a/mi.csv
 
-This pattern (an "early-return guard" inside a procedural prompt) generalizes well
-to other agents: instructions framed as **numbered steps that can short-circuit**
-are followed more reliably than the same rules expressed as bullet-point restrictions.
+# Guarda las predicciones a un CSV de salida
+python -m src.sentiment --out resultados.csv
+```
 
-## Tech stack
+El script le pide al agente que responda con una sola palabra (`positivo`, `neutral` o `negativo`)
+por comentario y, si el CSV trae la columna `sentimiento_esperado`, compara y muestra errores.
+
+## Configuración del agente en DO Gradient AI
+
+Si quieres recrear el agente tú mismo (recomendado para aprender):
+
+1. Crea un proyecto en DO y un Personal Access Token con los scopes `genai` (CRUD completo)
+   y `project` (lectura).
+2. Crea un agente en **Agent Platform**:
+   - **Nombre:** `code-reading-mentor`
+   - **Modelo:** `Meta Llama 3.3 Instruct (70B)` (los modelos open-source están
+     disponibles incluso en el tier de prueba; los modelos comerciales como Claude
+     o GPT pueden requerir un tier pago).
+   - **Región:** `tor1`
+   - **Instrucciones:** ver [`prompts/system_prompt_v2.md`](prompts/system_prompt_v2.md).
+3. Genera un Endpoint Access Key desde los ajustes del agente.
+
+## Notas sobre el system prompt
+
+Las instrucciones evolucionaron a través de iteraciones:
+
+- **v1** — protocolo básico de 5 pasos. Fallaba cuando recibía fragmentos sin contexto:
+  inventaba explicaciones plausibles-pero-incorrectas sobre métodos que nunca había visto.
+- **v2 (actual)** — agrega un **Paso 0: Verificación de Contexto** obligatorio antes de
+  cualquier análisis. Si el fragmento tiene identificadores no definidos y no hay contexto
+  alrededor, el agente detiene el protocolo y hace 1–3 preguntas puntuales en lugar de adivinar.
+
+Este patrón (un "guard de retorno temprano" dentro de un prompt procedural) generaliza bien
+a otros agentes: las instrucciones expresadas como **pasos numerados que pueden cortar el flujo**
+se siguen de manera más confiable que las mismas reglas expresadas como bullets de restricciones.
+
+## Stack técnico
 
 - **Python 3.10+**
-- **[OpenAI Python SDK](https://github.com/openai/openai-python)** — used as a generic
-  client because DO Gradient AI exposes an OpenAI-compatible API.
-- **[python-dotenv](https://pypi.org/project/python-dotenv/)** — `.env` loader.
-- **[rich](https://github.com/Textualize/rich)** — terminal formatting.
-- **DO Gradient AI Platform** — managed agent hosting.
+- **[OpenAI Python SDK](https://github.com/openai/openai-python)** — usado como cliente
+  genérico porque DO Gradient AI expone una API compatible con OpenAI.
+- **[python-dotenv](https://pypi.org/project/python-dotenv/)** — cargador de `.env`.
+- **[rich](https://github.com/Textualize/rich)** — formato en la terminal.
+- **DO Gradient AI Platform** — hosting gestionado del agente.
 
-## Project structure
+## Estructura del proyecto
 
 ```
 code-reading-mentor/
-├── .env.example          # Template for env vars (committed)
+├── .env.example                   # Plantilla de variables de entorno (se commitea)
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
+├── data/
+│   └── comentarios_codigo.csv     # Dataset de ejemplo para el analizador de sentimientos
 ├── prompts/
-│   └── system_prompt_v2.md   # Versioned system prompt
+│   └── system_prompt_v2.md        # System prompt versionado
 └── src/
     ├── __init__.py
-    ├── client.py         # One-shot agent client
-    └── chat.py           # Interactive REPL with streaming
+    ├── client.py                  # Cliente de una sola interacción
+    ├── chat.py                    # REPL interactivo con streaming
+    └── sentiment.py               # Analizador de sentimientos sobre CSV
 ```
 
-## Lessons learned
+## Lecciones aprendidas
 
-- **System prompts are code.** They have bugs, get versioned, deserve test cases.
-- **Operational constraints shape design.** Trial tier blocked Claude/GPT; the code
-  reads `model` from env so swapping providers stays a config change, not a refactor.
-- **OpenAI compatibility matters more than any single provider.** DO, Groq, Together,
-  vLLM and others all expose the same shape. Code against the shape, not the brand.
-- **Defensive behavior beats apparent helpfulness.** An agent that asks for missing
-  context produces less impressive demos but more correct answers.
+- **Los system prompts son código.** Tienen bugs, se versionan, merecen casos de prueba.
+- **Las restricciones operativas moldean el diseño.** El tier de prueba bloqueaba Claude/GPT;
+  el código lee `model` desde env para que cambiar de proveedor sea cambio de config,
+  no refactor.
+- **La compatibilidad con OpenAI importa más que cualquier proveedor individual.** DO, Groq,
+  Together, vLLM y otros exponen la misma forma. Programa contra la forma, no contra la marca.
+- **El comportamiento defensivo le gana a la utilidad aparente.** Un agente que pide contexto
+  que falta genera demos menos impresionantes, pero respuestas más correctas.
 
-## License
+## Licencia
 
-MIT — see [LICENSE](LICENSE).
+MIT — ver [LICENSE](LICENSE).
