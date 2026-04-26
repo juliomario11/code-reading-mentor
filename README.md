@@ -30,7 +30,7 @@ agent end-to-end, without lock-in to any single LLM provider:
 
 ## Architecture
 
-\`\`\`
+```
                   +-------------------------------+
                   |   DigitalOcean Gradient AI    |
    +--------+     |   ┌─────────────────────┐     |
@@ -40,7 +40,7 @@ agent end-to-end, without lock-in to any single LLM provider:
         ↑         |   └─────────────────────┘     |
         |         +-------------------------------+
         +---- streaming response (token-by-token)
-\`\`\`
+```
 
 The agent's endpoint is OpenAI-compatible, so the client uses the official
 `openai` Python SDK — only the `base_url` changes. This means the same code
