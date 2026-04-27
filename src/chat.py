@@ -1,17 +1,24 @@
 """
-REPL conversacional para hablar con el agente code-reading-mentor.
+REPL conversacional para hablar con un agente desplegado en DigitalOcean
+Gradient AI.
 
-Mantiene historial de mensajes en memoria durante la sesión, así el
-agente recuerda el contexto previo. Usa `rich` para render de markdown
-en consola.
+Mantiene historial de mensajes en memoria durante la sesión, así el agente
+recuerda el contexto previo. El system prompt se carga desde el archivo
+indicado en `SYSTEM_PROMPT_FILE` (o `prompts/system_prompt.md` por defecto)
+y se prepende al historial como mensaje `role: system`.
 
 Uso:
     python -m src.chat
 
+    # Con un system prompt distinto:
+    SYSTEM_PROMPT_FILE=prompts/examples/customer_support.md python -m src.chat
+
 Comandos durante la sesión:
-    /reset   → borra el historial y empieza una nueva conversación
-    /exit    → sale del REPL (también funciona Ctrl+C)
-    /tokens  → muestra cuántos mensajes acumulados van
+    /reset    → borra el historial y empieza una nueva conversación
+                (vuelve a inyectar el system prompt actual)
+    /reload   → recarga el system prompt desde disco sin perder el historial
+    /tokens   → muestra cuántos mensajes acumulados van
+    /exit     → sale del REPL (también funciona Ctrl+C)
 """
 
 from __future__ import annotations
@@ -25,7 +32,7 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Prompt
 
-from src.client import AgentConfig, build_client
+from src.client import AgentConfig, build_client, load_system_prompt
 
 
 class Message(TypedDict):
@@ -34,14 +41,25 @@ class Message(TypedDict):
 
 
 WELCOME = """
-# 🧠 code-reading-mentor
+# 🤖 gradient-agent-starter — REPL
 
-Pega código y te lo explico. Comandos:
+Plantilla para hablar con un agente de DigitalOcean Gradient AI.
+El system prompt se carga desde un archivo en `prompts/`.
 
-- `/reset`  → empieza nueva conversación
+Comandos:
+
+- `/reset`  → empieza nueva conversación (re-inyecta el system prompt)
+- `/reload` → recarga el system prompt desde disco
 - `/tokens` → muestra mensajes acumulados
 - `/exit`   → salir
 """
+
+
+def initial_history(system_prompt: str) -> list[Message]:
+    """Crea un historial nuevo con el system prompt al inicio (si lo hay)."""
+    if system_prompt:
+        return [{"role": "system", "content": system_prompt}]
+    return []
 
 
 def stream_response(client, model: str, history: list[Message], console: Console) -> str:
@@ -57,7 +75,6 @@ def stream_response(client, model: str, history: list[Message], console: Console
             stream=True,
         )
 
-    # Una vez tengamos el stream, imprimimos token por token sin el spinner.
     console.print("\n[bold cyan]agente[/bold cyan] ", end="")
     for chunk in stream:
         delta = chunk.choices[0].delta.content or ""
@@ -78,9 +95,18 @@ def run_repl() -> int:
         return 1
 
     client = build_client(config)
-    history: list[Message] = []
+    system_prompt = load_system_prompt(config.system_prompt_path)
+    history: list[Message] = initial_history(system_prompt)
 
     console.print(Panel(Markdown(WELCOME), border_style="cyan"))
+    console.print(
+        f"[dim]system prompt: {config.system_prompt_path} "
+        f"({len(system_prompt)} chars)[/dim]\n"
+    )
+    if not system_prompt:
+        console.print(
+            "[yellow]⚠️  No se encontró system prompt; el agente usa sus defaults.[/yellow]\n"
+        )
 
     while True:
         try:
@@ -98,8 +124,26 @@ def run_repl() -> int:
             return 0
 
         if user_input == "/reset":
-            history = []
-            console.print("[yellow]🧹 historial limpio.[/yellow]\n")
+            history = initial_history(system_prompt)
+            console.print("[yellow]🧹 historial limpio (system prompt re-inyectado).[/yellow]\n")
+            continue
+
+        if user_input == "/reload":
+            system_prompt = load_system_prompt(config.system_prompt_path)
+            # También parcheamos el system message que vive en `history` —
+            # si no, el cambio sólo aplica tras /reset, que es justo lo que
+            # /reload intenta evitar.
+            if history and history[0]["role"] == "system":
+                if system_prompt:
+                    history[0] = {"role": "system", "content": system_prompt}
+                else:
+                    history.pop(0)
+            elif system_prompt:
+                history.insert(0, {"role": "system", "content": system_prompt})
+            console.print(
+                f"[yellow]🔄 system prompt recargado ({len(system_prompt)} chars). "
+                "Se aplicará al próximo turno.[/yellow]\n"
+            )
             continue
 
         if user_input == "/tokens":
@@ -116,7 +160,6 @@ def run_repl() -> int:
             return 2
         except APIConnectionError as e:
             console.print(f"[bold red]❌ sin conexión: {e}[/bold red]")
-            # Quitamos el último user message porque no obtuvimos respuesta.
             history.pop()
             continue
         except APIError as e:
@@ -124,8 +167,6 @@ def run_repl() -> int:
             history.pop()
             continue
 
-        # Render del markdown completo de forma bonita al final.
-        # (Lo de arriba imprimió tokens en bruto; esto lo "rehace" formateado.)
         console.rule(style="dim")
         console.print(Markdown(answer))
         console.rule(style="dim")
