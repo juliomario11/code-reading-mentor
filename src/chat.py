@@ -130,9 +130,19 @@ def run_repl() -> int:
 
         if user_input == "/reload":
             system_prompt = load_system_prompt(config.system_prompt_path)
+            # También parcheamos el system message que vive en `history` —
+            # si no, el cambio sólo aplica tras /reset, que es justo lo que
+            # /reload intenta evitar.
+            if history and history[0]["role"] == "system":
+                if system_prompt:
+                    history[0] = {"role": "system", "content": system_prompt}
+                else:
+                    history.pop(0)
+            elif system_prompt:
+                history.insert(0, {"role": "system", "content": system_prompt})
             console.print(
                 f"[yellow]🔄 system prompt recargado ({len(system_prompt)} chars). "
-                "Se aplicará a futuros turnos.[/yellow]\n"
+                "Se aplicará al próximo turno.[/yellow]\n"
             )
             continue
 
