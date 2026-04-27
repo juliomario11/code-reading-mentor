@@ -84,10 +84,7 @@ DO_AGENT_ACCESS_KEY=tu_endpoint_access_key
 DO_AGENT_MODEL=n/a   # El agente ya tiene un modelo configurado del lado del servidor
 ```
 
-Estos valores los obtienes desde el panel de tu agente de DO Gradient AI:
-1. Entra a tu agente en [el panel de control de DO](https://cloud.digitalocean.com/gen-ai/agents).
-2. Copia el **Endpoint URL** (arriba en la página del agente).
-3. Crea un **Endpoint Access Key** en la sección de ajustes del agente.
+Para sacar estos dos valores desde el panel de DO, sigue la [**guía visual paso a paso**](#cómo-obtener-las-credenciales-del-env) más abajo.
 
 ### Ejecución
 
@@ -135,6 +132,74 @@ python -m src.sentiment --out resultados.csv
 
 El script le pide al agente que responda con una sola palabra (`positivo`, `neutral` o `negativo`)
 por comentario y, si el CSV trae la columna `sentimiento_esperado`, compara y muestra errores.
+
+## Cómo obtener las credenciales del `.env`
+
+Para usar el agente desde tu máquina local necesitas dos valores que viven en el panel
+de DigitalOcean: el **Endpoint URL** (a qué dirección hablarle al agente) y un
+**Endpoint Access Key** (con qué credencial autenticarte). Esta sección muestra el
+flujo completo en la UI actual de DO. Las capturas viven en [`docs/imagenes/`](docs/imagenes/).
+
+> **Aviso de seguridad.** El Endpoint Access Key sólo se muestra **una vez**, justo
+> después de crearlo. Cópialo de inmediato a tu `.env` local. Nunca lo subas al repo
+> (el `.gitignore` ya excluye `.env`). Si se filtra, bórralo y crea uno nuevo.
+
+### Paso 1 — Abre tu proyecto en el panel
+
+Inicia sesión en [cloud.digitalocean.com](https://cloud.digitalocean.com/) y entra a tu
+proyecto. En la sección **Agents** vas a ver tu agente listado, con su estado
+(`Running`) y el endpoint público a la derecha.
+
+![Panel del proyecto con el agente listado](docs/imagenes/01-panel-proyecto.png)
+
+### Paso 2 — Copia el Endpoint URL desde el Overview del agente
+
+Haz clic en el nombre del agente. En la pestaña **Overview** verás la tarjeta
+**Agent Essentials** con la sección **Endpoint**: ese campo (`https://…agents.do-ai.run`)
+es el valor de `DO_AGENT_ENDPOINT` en tu `.env`. Cópialo con el botón a la derecha.
+
+![Overview del agente con Endpoint URL](docs/imagenes/02-agente-overview.png)
+
+### Paso 3 — Ve a Settings → Endpoint Access Keys
+
+Cambia a la pestaña **Settings** y desplázate hasta la sección **Endpoint Access Keys**.
+Aquí gestionas las credenciales que permiten que apps externas (como este repo) hablen
+con el endpoint privado de tu agente sin tener que ponerlo en modo público.
+
+![Sección Endpoint Access Keys](docs/imagenes/03-settings-access-keys.png)
+
+### Paso 4 — Crea una key nueva
+
+Haz clic en **Create Key**, dale un nombre descriptivo (por ejemplo
+`vscode-local-dev` o `doc-screenshot-demo`) y confirma con **Create**. Usa un nombre
+distinto por entorno/máquina para poder revocar uno sin afectar a los demás.
+
+![Modal de creación de Access Key](docs/imagenes/04-modal-crear-key.png)
+
+### Paso 5 — Copia el secreto **antes** de cerrar el aviso
+
+Después de crear la key aparece un aviso _"Don't forget to copy your secret key"_ con el
+valor real (en la imagen aparece tachado por seguridad). **Cópialo ahora**: en cuanto
+recargues la página o cierres el aviso, ya no podrás verlo otra vez. Pégalo en tu
+`.env` local como `DO_AGENT_ACCESS_KEY`.
+
+![Aviso con la secret key recién creada (valor redactado)](docs/imagenes/05-key-creada.png)
+
+Si pierdes el valor antes de copiarlo, no pasa nada: usa el menú `…` de esa key para
+**Regenerate** (rota el valor) o **Delete** (la borra) y crea una nueva.
+
+### Resultado: tu `.env` local
+
+Con los dos valores de arriba, tu `.env` queda así:
+
+```env
+DO_AGENT_ENDPOINT=https://TU_SUBDOMINIO.agents.do-ai.run
+DO_AGENT_ACCESS_KEY=el_valor_que_copiaste_en_el_paso_5
+DO_AGENT_MODEL=n/a
+```
+
+Documentación oficial de DO sobre access keys:
+[Manage Endpoint Access Keys](https://docs.digitalocean.com/products/genai-platform/how-to/manage-endpoint-access-keys/).
 
 ## Configuración del agente en DO Gradient AI
 
