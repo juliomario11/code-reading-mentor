@@ -1,9 +1,15 @@
 """
-Analizador de sentimientos sobre comentarios de código.
+Analizador de sentimientos: ejemplo de uso del agente como clasificador.
 
 Lee un CSV con columnas (id, texto, sentimiento_esperado), le pide al agente
-code-reading-mentor que clasifique cada `texto` como positivo / neutral /
-negativo, y compara el resultado con la etiqueta esperada del dataset.
+que clasifique cada `texto` como positivo / neutral / negativo, y compara el
+resultado con la etiqueta esperada del dataset.
+
+El prompt de clasificación se carga desde
+`prompts/examples/sentiment_classifier.md` y se inyecta como mensaje
+`role: system`. Esto demuestra el patrón general del repo: el comportamiento
+del agente para una tarea concreta vive en un archivo del repo, no en la UI
+de DigitalOcean.
 
 Uso:
     python -m src.sentiment                         # usa data/comentarios_codigo.csv
@@ -24,19 +30,13 @@ from typing import Iterable
 
 from openai import APIConnectionError, APIError, AuthenticationError
 
-from src.client import AgentConfig, build_client
+from src.client import AgentConfig, build_client, load_system_prompt
 
 ETIQUETAS = ("positivo", "neutral", "negativo")
 
-CLASSIFICATION_PROMPT = (
-    "Actúa como un clasificador de sentimientos para comentarios de revisión "
-    "de código escritos en español. Responde ÚNICAMENTE con una sola palabra "
-    "en minúsculas, sin puntuación ni explicación: 'positivo', 'neutral' o "
-    "'negativo'.\n\n"
-    "Comentario:\n"
-)
-
-DEFAULT_CSV = Path(__file__).resolve().parent.parent / "data" / "comentarios_codigo.csv"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_CSV = REPO_ROOT / "data" / "comentarios_codigo.csv"
+CLASSIFIER_PROMPT_PATH = REPO_ROOT / "prompts" / "examples" / "sentiment_classifier.md"
 
 
 def leer_csv(path: Path) -> list[dict[str, str]]:
@@ -54,7 +54,10 @@ def normalizar_etiqueta(respuesta: str) -> str:
 
 
 def clasificar(
-    client, model: str, filas: Iterable[dict[str, str]]
+    client,
+    model: str,
+    filas: Iterable[dict[str, str]],
+    system_prompt: str,
 ) -> list[dict[str, str]]:
     resultados: list[dict[str, str]] = []
     for fila in filas:
@@ -62,10 +65,14 @@ def clasificar(
         if not texto:
             continue
 
-        prompt = CLASSIFICATION_PROMPT + texto
+        messages: list[dict] = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": texto})
+
         respuesta = client.chat.completions.create(
             model=model,
-            messages=[{"role": "user", "content": prompt}],
+            messages=messages,
             temperature=0,
         )
         bruto = respuesta.choices[0].message.content or ""
@@ -151,11 +158,20 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     client = build_client(config)
+    system_prompt = load_system_prompt(CLASSIFIER_PROMPT_PATH)
+    if not system_prompt:
+        print(
+            f"❌ No se encontró el prompt de clasificación en {CLASSIFIER_PROMPT_PATH}",
+            file=sys.stderr,
+        )
+        return 1
+
     filas = leer_csv(entrada)
     print(f"📥 Cargadas {len(filas)} filas desde {entrada}")
+    print(f"   Prompt: {CLASSIFIER_PROMPT_PATH}")
 
     try:
-        resultados = clasificar(client, config.model, filas)
+        resultados = clasificar(client, config.model, filas, system_prompt)
     except AuthenticationError:
         print("❌ Access key inválida. Verifica DO_AGENT_ACCESS_KEY.", file=sys.stderr)
         return 2
