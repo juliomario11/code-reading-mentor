@@ -72,7 +72,10 @@ def load_system_prompt(path: Path) -> str:
     """
     try:
         return path.read_text(encoding="utf-8").strip()
-    except FileNotFoundError:
+    except (FileNotFoundError, IsADirectoryError):
+        # IsADirectoryError ocurre cuando SYSTEM_PROMPT_FILE="" en .env, porque
+        # Path("") se resuelve a "." (el directorio actual). Mejor caer a
+        # "sin system prompt" que crashear con un traceback confuso.
         return ""
 
 
